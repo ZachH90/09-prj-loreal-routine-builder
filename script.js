@@ -34,6 +34,8 @@ const translations = {
     selectedProductsTitle: "Selected Products",
     noSelectedProducts: "No products selected yet.",
     selectCategory: "Select a category to view products",
+    searchOrCategoryHint:
+      "Type at least 3 characters or choose a category to view products.",
     noSearchResults: "No products match your search.",
     generateRoutine: "Generate Routine",
     chatHeading: "Let's Build Your Routine",
@@ -55,6 +57,7 @@ const translations = {
     selectedProductsTitle: "المنتجات المختارة",
     noSelectedProducts: "لم يتم اختيار أي منتجات بعد.",
     selectCategory: "اختر فئة لعرض المنتجات",
+    searchOrCategoryHint: "اكتب 3 أحرف على الأقل أو اختر فئة لعرض المنتجات.",
     noSearchResults: "لا توجد منتجات مطابقة لبحثك.",
     generateRoutine: "إنشاء الروتين",
     chatHeading: "لننشىء روتينك",
@@ -339,16 +342,28 @@ function toggleSelectedProduct(productId) {
 /* Create HTML for displaying product cards */
 function displayProducts() {
   const text = getUIText();
+  const hasCategorySelection = Boolean(currentCategory);
+  const hasValidSearchTerm = currentSearchTerm.length >= 3;
+
+  if (!hasCategorySelection && !hasValidSearchTerm) {
+    productsContainer.innerHTML = `
+      <div class="placeholder-message">
+        ${text.searchOrCategoryHint}
+      </div>
+    `;
+    return;
+  }
+
   const filteredProducts = (
     currentCategory
       ? allProducts.filter((product) => product.category === currentCategory)
       : allProducts
   ).filter((product) => {
-    const searchTerm = currentSearchTerm.toLowerCase();
-
-    if (!searchTerm) {
+    if (!hasValidSearchTerm) {
       return true;
     }
+
+    const searchTerm = currentSearchTerm.toLowerCase();
 
     return [product.name, product.brand, product.description]
       .join(" ")
@@ -359,7 +374,7 @@ function displayProducts() {
   if (filteredProducts.length === 0) {
     productsContainer.innerHTML = `
       <div class="placeholder-message">
-        ${currentSearchTerm.length >= 3 ? text.noSearchResults : text.selectCategory}
+        ${hasValidSearchTerm ? text.noSearchResults : text.selectCategory}
       </div>
     `;
     return;
